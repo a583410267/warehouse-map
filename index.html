@@ -7,413 +7,324 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
-  #map { width: 100%; height: 100vh; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+#map{width:100%;height:100vh}
 
-  .map-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);
-    color: white; padding: 10px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2); font-size: 14px;
-  }
-  .map-header h1 { font-size: 16px; font-weight: 600; }
-  .map-header .stats { font-size: 12px; opacity: 0.9; }
+.map-header{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:linear-gradient(135deg,#ff6b00,#ff8c33);
+  color:#fff;padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);font-size:14px
+}
+.map-header h1{font-size:16px;font-weight:600}
+.map-header .stats{font-size:12px;opacity:.9}
 
-  .filter-panel {
-    position: fixed; top: 54px; right: 16px; z-index: 1000;
-    background: white; border-radius: 12px; padding: 14px 18px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-size: 13px; min-width: 150px;
-  }
-  .filter-panel strong { display: block; margin-bottom: 8px; font-size: 14px; color: #333; }
-  .filter-panel label { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 3px 0; font-size: 13px; }
-  .filter-panel input[type="checkbox"] { accent-color: #ff6b00; }
-  .filter-panel hr { border: none; border-top: 1px solid #eee; margin: 8px 0; }
-  .filter-hint { font-size: 11px; color: #999; margin-top: 6px; line-height: 1.4; }
+.filter-panel{
+  position:fixed;top:54px;right:16px;z-index:1000;
+  background:#fff;border-radius:12px;padding:14px 18px;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:13px;min-width:150px
+}
+.filter-panel strong{display:block;margin-bottom:8px;font-size:14px;color:#333}
+.filter-panel label{display:flex;align-items:center;gap:6px;cursor:pointer;padding:3px 0;font-size:13px}
+.filter-panel input[type=checkbox]{accent-color:#ff6b00}
+.filter-panel hr{border:none;border-top:1px solid #eee;margin:8px 0}
+.filter-hint{font-size:11px;color:#999;margin-top:6px;line-height:1.4}
 
-  .coverage-panel {
-    position: fixed; top: 54px; left: 16px; z-index: 1000;
-    background: white; border-radius: 12px; padding: 14px 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-size: 12px;
-    min-width: 280px; max-height: 70vh; overflow-y: auto;
-    display: none;
-  }
-  .coverage-panel.show { display: block; }
-  .coverage-panel h3 { font-size: 14px; color: #ff6b00; margin-bottom: 10px; }
-  .coverage-row { display: flex; align-items: center; margin-bottom: 4px; font-size: 11px; }
-  .cov-prov { width: 50px; text-align: right; padding-right: 6px; color: #555; }
-  .cov-bar-wrap { flex: 1; height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; }
-  .cov-bar { height: 100%; border-radius: 5px; background: #ff6b00; }
-  .cov-pct { width: 40px; padding-left: 6px; color: #333; }
-  .close-btn { position: absolute; top: 8px; right: 10px; cursor: pointer; color: #999; font-size: 18px; }
+.coverage-panel{
+  position:fixed;top:54px;left:16px;z-index:1000;
+  background:#fff;border-radius:12px;padding:14px 16px;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:12px;
+  min-width:280px;max-height:70vh;overflow-y:auto;display:none
+}
+.coverage-panel.show{display:block}
+.coverage-panel h3{font-size:14px;color:#ff6b00;margin-bottom:10px}
+.cov-row{display:flex;align-items:center;margin-bottom:4px;font-size:11px}
+.cov-prov{width:50px;text-align:right;padding-right:6px;color:#555}
+.cov-bar-wrap{flex:1;height:10px;background:#f0f0f0;border-radius:5px;overflow:hidden}
+.cov-bar{height:100%;border-radius:5px;background:#ff6b00}
+.cov-pct{width:50px;padding-left:6px;color:#333}
+.close-btn{position:absolute;top:8px;right:10px;cursor:pointer;color:#999;font-size:18px}
 
-  .layer-btn {
-    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
-    background: white; border: 2px solid #ff6b00; color: #ff6b00;
-    border-radius: 10px; padding: 10px 16px;
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    box-shadow: 0 4px 15px rgba(255,107,0,0.3);
-  }
-  .layer-btn.active { background: #ff6b00; color: white; }
-  .layer-btn span { font-size: 16px; margin-right: 4px; }
+.layer-btn{
+  position:fixed;bottom:24px;right:24px;z-index:1000;
+  background:#fff;border:2px solid #ff6b00;color:#ff6b00;
+  border-radius:10px;padding:10px 16px;
+  font-size:13px;font-weight:500;cursor:pointer;
+  box-shadow:0 4px 15px rgba(255,107,0,.3)
+}
+.layer-btn.active{background:#ff6b00;color:#fff}
 
-  .legend {
-    position: fixed; bottom: 24px; left: 24px; z-index: 1000;
-    background: white; border-radius: 12px; padding: 14px 18px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-size: 12px; line-height: 1.9;
-  }
-  .legend h3 { font-size: 13px; margin-bottom: 6px; color: #333; }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.legend{
+  position:fixed;bottom:80px;left:24px;z-index:1000;
+  background:#fff;border-radius:12px;padding:14px 18px;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:12px;line-height:1.9
+}
+.legend h3{font-size:13px;margin-bottom:6px;color:#333}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 
-  .leaflet-popup-content-wrapper { border-radius: 10px !important; }
-  .popup-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
-  .popup-subtype { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-bottom: 6px; }
-  .subtype-small { background: #fee; color: #c0392b; }
-  .subtype-medium { background: #fff3e0; color: #e67e22; }
-  .subtype-normal { background: #e3f2fd; color: #1565c0; }
-  .popup-info { font-size: 12px; color: #666; line-height: 1.8; }
-  .popup-info span { color: #333; font-weight: 500; }
-  .popup-expire { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-top: 4px; }
-  .expire-urgent { background: #fee; color: #c0392b; }
-  .expire-warn { background: #fff3e0; color: #e67e22; }
-  .expire-ok { background: #e8f5e9; color: #27ae60; }
-  .popup-btn { display: inline-block; margin-top: 8px; padding: 5px 12px; background: #ff6b00; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; margin-right: 4px; }
-  .popup-btn:hover { background: #e55a00; }
+.leaflet-popup-content-wrapper{border-radius:10px!important}
+.popup-title{font-size:15px;font-weight:600;color:#333;margin-bottom:6px}
+.popup-subtype{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:500;margin-bottom:6px;background:#eee;color:#555}
+.popup-info{font-size:12px;color:#666;line-height:1.8}
+.popup-info span{color:#333;font-weight:500}
+.popup-expire{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin-top:4px}
+.expire-urgent{background:#fee;color:#c0392b}
+.expire-warn{background:#fff3e0;color:#e67e22}
+.expire-ok{background:#e8f5e9;color:#27ae60}
+.popup-btn{display:inline-block;margin-top:8px;padding:5px 12px;background:#ff6b00;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer}
+.popup-btn:hover{background:#e55a00}
 </style>
 </head>
 <body>
 
 <div class="map-header">
-  <h1>📦 小米中小件仓储全国布局图</h1>
-  <div class="stats">共 <strong>48</strong> 个仓库 · 中小件仓18 · 有品仓5 · 新零售仓27</div>
+<h1>📦 小米中小件仓储全国布局图</h1>
+<div class="stats">共 <strong>48</strong> 个仓库 · 中小件仓18 · 有品仓5 · 新零售仓27</div>
 </div>
 
 <div class="filter-panel">
-  <strong>📂 图层筛选</strong>
-  <label><input type="checkbox" checked onchange="toggleLayer('中小件仓')"> 🔵 中小件仓 (18)</label>
-  <label><input type="checkbox" checked onchange="toggleLayer('有品仓')"> 🟢 有品仓 (5)</label>
-  <label><input type="checkbox" checked onchange="toggleLayer('新零售仓')"> 🟣 新零售仓 (27)</label>
-  <hr>
-  <label style="color:#e74c3c"><input type="checkbox" checked onchange="toggleExpiring()"> ⚠️ 半年内到期提醒</label>
-  <div class="filter-hint">点击仓库，查看主要<br>覆盖区域 ▼</div>
+<strong>📂 图层筛选</strong>
+<label><input type="checkbox" checked onchange="toggleLayer('中小件仓')"> 🔵 中小件仓 (18)</label>
+<label><input type="checkbox" checked onchange="toggleLayer('有品仓')"> 🟢 有品仓 (5)</label>
+<label><input type="checkbox" checked onchange="toggleLayer('新零售仓')"> 🟣 新零售仓 (27)</label>
+<hr>
+<label style="color:#e74c3c"><input type="checkbox" checked onchange="toggleExpiring()"> ⚠️ 半年内到期提醒</label>
+<div class="filter-hint">点击仓库，查看主要<br>覆盖区域 ▼</div>
 </div>
 
-<button class="layer-btn" id="coverBtn" onclick="toggleCoverage()">
-  <span>🗺️</span> 显示覆盖区域
-</button>
+<button class="layer-btn" id="coverBtn" onclick="toggleCoverage()">🗺️ 显示覆盖区域</button>
 
 <div id="coveragePanel" class="coverage-panel">
-  <span class="close-btn" onclick="closeCoverage()">×</span>
-  <h3 id="panelTitle">主要覆盖区域</h3>
-  <div id="panelContent"></div>
+<span class="close-btn" onclick="closeCoverage()">×</span>
+<h3 id="panelTitle">主要覆盖区域</h3>
+<div id="panelContent"></div>
 </div>
 
 <div class="legend">
-  <h3>仓库类型</h3>
-  <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>小件仓</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#e67e22"></div>中件仓</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#3498db"></div>普通中小件仓</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div>有品仓</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div>新零售仓（顺丰）</div>
-  <div style="padding-top:6px;border-top:1px solid #eee;font-size:11px;color:#999;">
-    ⚠️ 标红=半年内到期<br>
-    点击仓库查看覆盖区域 →
-  </div>
+<h3>仓库类型</h3>
+<div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>小件仓</div>
+<div class="legend-item"><div class="legend-dot" style="background:#e67e22"></div>中件仓</div>
+<div class="legend-item"><div class="legend-dot" style="background:#3498db"></div>普通中小件仓</div>
+<div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div>有品仓</div>
+<div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div>新零售仓（顺丰）</div>
+<div style="padding-top:6px;border-top:1px solid #eee;font-size:11px;color:#999">⚠️ 标红=半年内到期<br>点击仓库查看覆盖区域 →</div>
 </div>
 
 <div id="map"></div>
 
 <script>
-// ============ 仓库数据 ============
-const warehouses = [
-  // 中小件仓
-  {name:"小件-北京中心仓",type:"中小件仓",subType:"小件仓",subColor:"#e74c3c",addr:"北京市大兴区",lat:39.78,lng:116.50,expire:"2026-06-30",supplier:"自营"},
-  {name:"中件-北京中件仓",type:"中小件仓",subType:"中件仓",subColor:"#e67e22",addr:"北京市平谷区",lat:40.17,lng:117.12,expire:"2026-11-30",supplier:"中材"},
-  {name:"中小件-深圳中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"深圳市龙岗区",lat:22.70,lng:114.12,expire:"2026-05-31",supplier:"顺丰"},
-  {name:"中小件-广州从化仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"广州从化",lat:23.55,lng:113.55,expire:"",supplier:"顺丰"},
-  {name:"中小件-昆山小件仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"江苏省昆山市",lat:31.39,lng:120.98,expire:"",supplier:""},
-  {name:"中小件-武汉中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"武汉市江夏区",lat:30.37,lng:114.34,expire:"",supplier:""},
-  {name:"中小件-成都中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"成都市新津区",lat:30.42,lng:103.81,expire:"2026-09-30",supplier:""},
-  {name:"中小件-郑州中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"郑州市中牟县",lat:34.72,lng:114.02,expire:"",supplier:""},
-  {name:"中小件-潍坊中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"潍坊市奎文区",lat:36.71,lng:119.16,expire:"2026-07-31",supplier:"顺丰"},
-  {name:"中小件-西安中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"咸阳市秦都区",lat:34.33,lng:108.71,expire:"2026-10-31",supplier:"中国邮政"},
-  {name:"中小件-沈阳中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"沈阳市铁西区",lat:41.80,lng:123.43,expire:"",supplier:""},
-  {name:"中小件-合肥仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"合肥市",lat:31.82,lng:117.28,expire:"",supplier:""},
-  {name:"中小件-泉州仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"晋江市",lat:24.87,lng:118.68,expire:"",supplier:""},
-  {name:"中小件-昆明仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"昆明市",lat:24.88,lng:102.83,expire:"",supplier:""},
-  {name:"中小件-兰州仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"兰州市新区",lat:36.06,lng:103.83,expire:"2026-08-31",supplier:""},
-  {name:"中小件-乌鲁木齐仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"乌鲁木齐市",lat:43.83,lng:87.58,expire:"2026-08-31",supplier:""},
-  // 有品仓
-  {name:"天津-东丽仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"天津东丽区",lat:39.08,lng:117.31,expire:"2026-08-31",supplier:""},
-  {name:"广东-东莞仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"东莞洪梅镇",lat:22.96,lng:113.60,expire:"",supplier:""},
-  {name:"贵阳-茅台仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"贵阳市",lat:26.65,lng:106.71,expire:"",supplier:""},
-  {name:"江苏-昆山仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"昆山千灯镇",lat:31.33,lng:121.02,expire:"",supplier:""},
-  {name:"湖北-武汉仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"武汉东西湖区",lat:30.62,lng:114.13,expire:"2026-08-31",supplier:""},
-  // 新零售仓
-  {name:"新零售-北京仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"北京",lat:39.90,lng:116.41,expire:"",supplier:"顺丰"},
-  {name:"新零售-上海仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"上海",lat:31.23,lng:121.47,expire:"",supplier:"顺丰"},
-  {name:"新零售-广州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"广州",lat:23.13,lng:113.26,expire:"",supplier:"顺丰"},
-  {name:"新零售-深圳仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"深圳",lat:22.54,lng:114.06,expire:"",supplier:"顺丰"},
-  {name:"新零售-武汉仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"武汉",lat:30.59,lng:114.30,expire:"",supplier:"顺丰"},
-  {name:"新零售-成都仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"成都",lat:30.57,lng:104.07,expire:"",supplier:"顺丰"},
-  {name:"新零售-杭州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"杭州",lat:30.27,lng:120.15,expire:"",supplier:"顺丰"},
-  {name:"新零售-重庆仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"重庆",lat:29.56,lng:106.55,expire:"",supplier:"顺丰"},
-  {name:"新零售-南京仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"南京",lat:32.06,lng:118.80,expire:"",supplier:"顺丰"},
-  {name:"新零售-西安仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"西安",lat:34.26,lng:108.94,expire:"",supplier:"顺丰"},
-  {name:"新零售-郑州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"郑州",lat:34.75,lng:113.65,expire:"",supplier:"顺丰"},
-  {name:"新零售-沈阳仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"沈阳",lat:41.80,lng:123.43,expire:"",supplier:"顺丰"},
-  {name:"新零售-天津仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"天津",lat:39.08,lng:117.31,expire:"",supplier:"顺丰"},
-  {name:"新零售-苏州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"苏州",lat:31.30,lng:120.58,expire:"",supplier:"顺丰"},
-  {name:"新零售-青岛仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"青岛",lat:36.07,lng:120.38,expire:"",supplier:"顺丰"},
-  {name:"新零售-长沙仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"长沙",lat:28.23,lng:112.94,expire:"",supplier:"顺丰"},
-  {name:"新零售-福州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"福州",lat:26.07,lng:119.30,expire:"",supplier:"顺丰"},
-  {name:"新零售-厦门仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"厦门",lat:24.48,lng:118.10,expire:"",supplier:"顺丰"},
-  {name:"新零售-南昌仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"南昌",lat:28.68,lng:115.86,expire:"",supplier:"顺丰"},
-  {name:"新零售-济南仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"济南",lat:36.65,lng:116.99,expire:"",supplier:"顺丰"},
-  {name:"新零售-大连仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"大连",lat:38.91,lng:121.63,expire:"",supplier:"顺丰"},
-  {name:"新零售-哈尔滨仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"哈尔滨",lat:45.80,lng:126.53,expire:"",supplier:"顺丰"},
-  {name:"新零售-昆明仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"昆明",lat:25.04,lng:102.68,expire:"",supplier:"顺丰"},
-  {name:"新零售-兰州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"兰州",lat:36.06,lng:103.83,expire:"",supplier:"顺丰"},
-  {name:"新零售-乌鲁木齐仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"乌鲁木齐",lat:43.83,lng:87.58,expire:"",supplier:"顺丰"},
-  {name:"新零售-石家庄仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"石家庄",lat:38.04,lng:114.51,expire:"",supplier:"顺丰"},
-  {name:"新零售-太原仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"太原",lat:37.87,lng:112.55,expire:"",supplier:"顺丰"},
+/* ===== 仓库数据 ===== */
+var warehouses = [
+{name:"小件-北京中心仓",type:"中小件仓",subType:"小件仓",subColor:"#e74c3c",addr:"北京市大兴区",lat:39.78,lng:116.50,expire:"2026-06-30",supplier:"自营"},
+{name:"中件-北京中件仓",type:"中小件仓",subType:"中件仓",subColor:"#e67e22",addr:"北京市平谷区",lat:40.17,lng:117.12,expire:"2026-11-30",supplier:"中材"},
+{name:"中小件-深圳中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"深圳市龙岗区",lat:22.70,lng:114.12,expire:"2026-05-31",supplier:"顺丰"},
+{name:"中小件-广州从化仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"广州从化",lat:23.55,lng:113.55,expire:"",supplier:"顺丰"},
+{name:"中小件-昆山小件仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"江苏省昆山市",lat:31.39,lng:120.98,expire:"",supplier:""},
+{name:"中小件-武汉中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"武汉市江夏区",lat:30.37,lng:114.34,expire:"",supplier:""},
+{name:"中小件-成都中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"成都市新津区",lat:30.42,lng:103.81,expire:"2026-09-30",supplier:""},
+{name:"中小件-郑州中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"郑州市中牟县",lat:34.72,lng:114.02,expire:"",supplier:""},
+{name:"中小件-潍坊中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"潍坊市奎文区",lat:36.71,lng:119.16,expire:"2026-07-31",supplier:"顺丰"},
+{name:"中小件-西安中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"咸阳市秦都区",lat:34.33,lng:108.71,expire:"2026-10-31",supplier:"中国邮政"},
+{name:"中小件-沈阳中心仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"沈阳市铁西区",lat:41.80,lng:123.43,expire:"",supplier:""},
+{name:"中小件-合肥仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"合肥市",lat:31.82,lng:117.28,expire:"",supplier:""},
+{name:"中小件-泉州仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"晋江市",lat:24.87,lng:118.68,expire:"",supplier:""},
+{name:"中小件-昆明仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"昆明市",lat:24.88,lng:102.83,expire:"",supplier:""},
+{name:"中小件-兰州仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"兰州市新区",lat:36.06,lng:103.83,expire:"2026-08-31",supplier:""},
+{name:"中小件-乌鲁木齐仓",type:"中小件仓",subType:"中小件仓",subColor:"#3498db",addr:"乌鲁木齐市",lat:43.83,lng:87.58,expire:"2026-08-31",supplier:""},
+{name:"天津-东丽仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"天津东丽区",lat:39.08,lng:117.31,expire:"2026-08-31",supplier:""},
+{name:"广东-东莞仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"东莞洪梅镇",lat:22.96,lng:113.60,expire:"",supplier:""},
+{name:"贵阳-茅台仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"贵阳市",lat:26.65,lng:106.71,expire:"",supplier:""},
+{name:"江苏-昆山仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"昆山千灯镇",lat:31.33,lng:121.02,expire:"",supplier:""},
+{name:"湖北-武汉仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",addr:"武汉东西湖区",lat:30.62,lng:114.13,expire:"2026-08-31",supplier:""},
+{name:"新零售-北京仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"北京",lat:39.90,lng:116.41,expire:"",supplier:"顺丰"},
+{name:"新零售-上海仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"上海",lat:31.23,lng:121.47,expire:"",supplier:"顺丰"},
+{name:"新零售-广州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"广州",lat:23.13,lng:113.26,expire:"",supplier:"顺丰"},
+{name:"新零售-深圳仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"深圳",lat:22.54,lng:114.06,expire:"",supplier:"顺丰"},
+{name:"新零售-武汉仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"武汉",lat:30.59,lng:114.30,expire:"",supplier:"顺丰"},
+{name:"新零售-成都仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"成都",lat:30.57,lng:104.07,expire:"",supplier:"顺丰"},
+{name:"新零售-杭州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"杭州",lat:30.27,lng:120.15,expire:"",supplier:"顺丰"},
+{name:"新零售-重庆仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"重庆",lat:29.56,lng:106.55,expire:"",supplier:"顺丰"},
+{name:"新零售-南京仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"南京",lat:32.06,lng:118.80,expire:"",supplier:"顺丰"},
+{name:"新零售-西安仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"西安",lat:34.26,lng:108.94,expire:"",supplier:"顺丰"},
+{name:"新零售-郑州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"郑州",lat:34.75,lng:113.65,expire:"",supplier:"顺丰"},
+{name:"新零售-沈阳仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"沈阳",lat:41.80,lng:123.43,expire:"",supplier:"顺丰"},
+{name:"新零售-天津仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"天津",lat:39.08,lng:117.31,expire:"",supplier:"顺丰"},
+{name:"新零售-苏州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"苏州",lat:31.30,lng:120.58,expire:"",supplier:"顺丰"},
+{name:"新零售-青岛仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"青岛",lat:36.07,lng:120.38,expire:"",supplier:"顺丰"},
+{name:"新零售-长沙仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"长沙",lat:28.23,lng:112.94,expire:"",supplier:"顺丰"},
+{name:"新零售-福州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"福州",lat:26.07,lng:119.30,expire:"",supplier:"顺丰"},
+{name:"新零售-厦门仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"厦门",lat:24.48,lng:118.10,expire:"",supplier:"顺丰"},
+{name:"新零售-南昌仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"南昌",lat:28.68,lng:115.86,expire:"",supplier:"顺丰"},
+{name:"新零售-济南仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"济南",lat:36.65,lng:116.99,expire:"",supplier:"顺丰"},
+{name:"新零售-大连仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"大连",lat:38.91,lng:121.63,expire:"",supplier:"顺丰"},
+{name:"新零售-哈尔滨仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"哈尔滨",lat:45.80,lng:126.53,expire:"",supplier:"顺丰"},
+{name:"新零售-昆明仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"昆明",lat:25.04,lng:102.68,expire:"",supplier:"顺丰"},
+{name:"新零售-兰州仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"兰州",lat:36.06,lng:103.83,expire:"",supplier:"顺丰"},
+{name:"新零售-乌鲁木齐仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"乌鲁木齐",lat:43.83,lng:87.58,expire:"",supplier:"顺丰"},
+{name:"新零售-石家庄仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"石家庄",lat:38.04,lng:114.51,expire:"",supplier:"顺丰"},
+{name:"新零售-太原仓",type:"新零售仓",subType:"新零售仓",subColor:"#9b59b6",addr:"太原",lat:37.87,lng:112.55,expire:"",supplier:"顺丰"}
 ];
 
-// ============ 发货数据（始发仓 -> 目的省：[数量, 省会经度, 省会纬度]）============
-const shippingData = {
-  "中小件-昆山中心仓": {"浙江":[27364,120.15,30.27],"江苏":[26063,120.98,31.39],"上海":[13175,121.47,31.23],"安徽":[6899,117.28,31.82],"山东":[1215,116.99,36.65]},
-  "中小件-深圳中心仓": {"���东":[47241,113.26,23.13],"广西":[7384,108.32,22.82],"福建":[4791,119.30,26.07],"海南":[2307,110.35,20.02],"江西":[1158,115.86,28.68]},
-  "小件-北京中心仓": {"北京":[10897,116.41,39.90],"河北":[9961,114.51,38.04],"天津":[4058,117.31,39.08],"内蒙古":[3359,111.75,40.84],"山东":[2791,116.99,36.65]},
-  "中小件-武汉中心仓": {"湖北":[12920,114.30,30.59],"湖南":[12037,112.94,28.23],"江西":[7660,115.86,28.68],"河南":[3465,113.65,34.75],"广东":[2343,113.26,23.13]},
-  "中小件-成都中心仓": {"四川":[16062,104.07,30.57],"重庆":[7431,106.55,29.56],"贵州":[4901,106.71,26.65],"云南":[3633,102.68,25.04],"广东":[647,113.26,23.13]},
-  "中小件-郑州中心仓": {"河南":[21319,113.65,34.75],"山西":[1008,112.55,37.87],"湖北":[712,114.30,30.59],"广东":[439,113.26,23.13],"江苏":[409,120.98,31.39]},
-  "中小件-潍坊中心仓": {"山东":[18193,116.99,36.65],"河北":[2031,114.51,38.04],"江苏":[1972,120.98,31.39],"河南":[496,113.65,34.75],"天津":[398,117.31,39.08]},
-  "中小件-西安中心仓": {"陕西":[8278,108.94,34.26],"山西":[5087,112.55,37.87],"甘肃":[2595,103.83,36.06],"新疆":[2248,87.58,43.83],"宁夏":[843,106.27,38.47]},
-  "中小件-沈阳中心仓": {"辽宁":[7297,123.43,41.80],"黑龙江":[4881,126.53,45.80],"吉林":[3977,125.32,43.88],"内蒙古":[912,111.75,40.84],"河北":[396,114.51,38.04]},
-  "中小件-合肥仓": {"安徽":[7830,117.28,31.82],"浙江":[3053,120.15,30.27],"江苏":[2060,120.98,31.39],"上海":[887,121.47,31.23],"河南":[70,113.65,34.75]},
-  "中小件-泉州仓": {"福建":[5632,119.30,26.07],"广东":[2187,113.26,23.13],"浙江":[987,120.15,30.27],"江苏":[654,120.98,31.39],"上海":[543,121.47,31.23]},
-  "中小件-昆明仓": {"云南":[2106,102.68,25.04],"四川":[876,104.07,30.57],"贵州":[654,106.71,26.65],"广西":[321,108.32,22.82],"广东":[143,113.26,23.13]},
-  "中小件-北京中件仓": {"北京":[1254,116.41,39.90],"河北":[876,114.51,38.04],"天津":[387,117.31,39.08],"山西":[276,112.55,37.87],"内蒙古":[198,111.75,40.84]},
-  "中小件-乌鲁木齐仓": {"新疆":[2131,87.58,43.83],"甘肃":[276,103.83,36.06],"陕西":[187,108.94,34.26],"青海":[102.68,25.04],"宁夏":[843,106.27,38.47]},
-  "中小件-兰州仓": {"甘肃":[1321,103.83,36.06],"青海":[1027,101.78,36.62],"宁夏":[432,106.27,38.47],"新疆":[287,87.58,43.83],"陕西":[54,108.94,34.26]}
+/* ===== 发货数据：始发仓 -> 目的省 -> [数量, 经度, 纬度] ===== */
+var shippingData = {
+"中小件-昆山中心仓": {"浙江":[27364,120.15,30.27],"江苏":[26063,120.98,31.39],"上海":[13175,121.47,31.23],"安徽":[6899,117.28,31.82],"山东":[1215,116.99,36.65]},
+"中小件-深圳中心仓": {"广东":[47241,113.26,23.13],"广西":[7384,108.32,22.82],"福建":[4791,119.30,26.07],"海南":[2307,110.35,20.02],"江西":[2258,115.86,28.68]},
+"小件-北京中心仓": {"北京":[10897,116.41,39.90],"河北":[9961,114.51,38.04],"天津":[4058,117.31,39.08],"内蒙古":[3359,111.75,40.84],"山东":[2791,116.99,36.65]},
+"中小件-武汉中心仓": {"湖北":[12920,114.30,30.59],"湖南":[12037,112.94,28.23],"江西":[7660,115.86,28.68],"河南":[3465,113.65,34.75],"广东":[2343,113.26,23.13]},
+"中小件-成都中心仓": {"四川":[16062,104.07,30.57],"重庆":[7431,106.55,29.56],"贵州":[4901,106.71,26.65],"云南":[3633,102.68,25.04],"广东":[647,113.26,23.13]},
+"中小件-郑州中心仓": {"河南":[21319,113.65,34.75],"山西":[1008,112.55,37.87],"湖北":[712,114.30,30.59],"广东":[439,113.26,23.13],"江苏":[409,120.98,31.39]},
+"中小件-潍坊中心仓": {"山东":[18193,116.99,36.65],"河北":[2031,114.51,38.04],"江苏":[1972,120.98,31.39],"河南":[496,113.65,34.75],"天津":[398,117.31,39.08]},
+"中小件-西安中心仓": {"陕西":[8278,108.94,34.26],"山西":[5087,112.55,37.87],"甘肃":[2595,103.83,36.06],"新疆":[2248,87.58,43.83],"宁夏":[843,106.27,38.47]},
+"中小件-沈阳中心仓": {"辽宁":[7297,123.43,41.80],"黑龙江":[4881,126.53,45.80],"吉林":[3977,125.32,43.88],"内蒙古":[912,111.75,40.84],"河北":[396,114.51,38.04]},
+"中小件-合肥仓": {"安徽":[7830,117.28,31.82],"浙江":[3053,120.15,30.27],"江苏":[2060,120.98,31.39],"上海":[887,121.47,31.23],"河南":[70,113.65,34.75]},
+"中小件-泉州仓": {"福建":[5632,119.30,26.07],"广东":[2187,113.26,23.13],"浙江":[987,120.15,30.27],"江苏":[654,120.98,31.39],"上海":[543,121.47,31.23]},
+"中小件-昆明仓": {"云南":[2106,102.68,25.04],"四川":[876,104.07,30.57],"贵州":[654,106.71,26.65],"广西":[321,108.32,22.82],"广东":[143,113.26,23.13]},
+"中小件-北京中件仓": {"北京":[1254,116.41,39.90],"河北":[876,114.51,38.04],"天津":[387,117.31,39.08],"山西":[276,112.55,37.87],"内蒙古":[198,111.75,40.84]},
+"中小件-乌鲁木齐仓": {"新疆":[2131,87.58,43.83],"甘肃":[276,103.83,36.06],"陕西":[187,108.94,34.26],"青海":[102,101.78,36.62],"宁夏":[21,106.27,38.47]},
+"中小件-兰州仓": {"甘肃":[1321,103.83,36.06],"青海":[1027,101.78,36.62],"宁夏":[432,106.27,38.47],"新疆":[287,87.58,43.83],"陕西":[54,108.94,34.26]}
 };
 
-// 映射：标准仓库名称 -> 发货数据key
-const nameMapping = {
-  "小件-北京中心仓": "小件-北京中心仓",
-  "中件-北京中件仓": "中小件-北京中件仓",
-  "中小件-深圳中心仓": "中小件-深圳中心仓",
-  "中小件-武汉中心仓": "中小件-武汉中心仓",
-  "中小件-成都中心仓": "中小件-成都中心仓",
-  "中小件-郑州中心仓": "中小件-郑州中心仓",
-  "中小件-潍坊中心仓": "中小件-潍坊中心仓",
-  "中小件-西安中心仓": "中小件-西安中心仓",
-  "中小件-沈阳中心仓": "中小件-沈阳中心仓",
-  "中小件-合肥仓": "中小件-合肥仓",
-  "中小件-泉州仓": "中小件-泉州仓",
-  "中小件-昆明仓": "中小件-昆明仓",
-  "中小件-兰州仓": "中小件-兰州仓",
-  "中小件-乌鲁木齐仓": "中小件-乌鲁木齐仓",
+/* 仓库名称映射 */
+var nameMap = {
+"小件-北京中心仓":"小件-北京中心仓",
+"中件-北京中件仓":"中小件-北京中件仓",
+"中小件-深圳中心仓":"中小件-深圳中心仓",
+"中小件-武汉中心仓":"中小件-武汉中心仓",
+"中小件-成都中心仓":"中小件-成都中心仓",
+"中小件-郑州中心仓":"中小件-郑州中心仓",
+"中小件-潍坊中心仓":"中小件-潍坊中心仓",
+"中小件-西安中心仓":"中小件-西安中心仓",
+"中小件-沈阳中心仓":"中小件-沈阳中心仓",
+"中小件-合肥仓":"中小件-合肥仓",
+"中小件-泉州仓":"中小件-泉州仓",
+"中小件-昆明仓":"中小件-昆明仓",
+"中小件-兰州仓":"中小件-兰州仓",
+"中小件-乌鲁木齐仓":"中小件-乌鲁木齐仓"
 };
 
-// ============ 地图初始化 ============
-const map = L.map('map', { center: [35.5, 108], zoom: 5, zoomControl: false });
-L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {
-  subdomains: '1234', attribution: '© 高德地图', maxZoom: 18
+/* ===== 地图初始化 ===== */
+var map = L.map("map",{center:[35.5,108],zoom:5,zoomControl:false});
+L.control.zoom({position:"bottomright"}).addTo(map);
+L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}",{
+  subdomains:"1234",attribution:"高德地图",maxZoom:18
 }).addTo(map);
 
-// ============ 图层组 ============
-const layerGroups = {
-  '中小件仓': L.layerGroup().addTo(map),
-  '有品仓': L.layerGroup().addTo(map),
-  '新零售仓': L.layerGroup().addTo(map),
-};
-const coverageLayer = L.layerGroup().addTo(map);
-const expiringMarkers = L.layerGroup().addTo(map);
-const allMarkers = {};
-let coverageOn = false;
+/* 图层组 */
+var layerGroups={"中小件仓":L.layerGroup().addTo(map),"有品仓":L.layerGroup().addTo(map),"新零售仓":L.layerGroup().addTo(map)};
+var coverageLayer=L.layerGroup();
+var expiringMarkers=L.layerGroup().addTo(map);
+var allMarkers={};
+var coverageOn=false;
 
-// ============ 工具函数 ============
-function createIcon(color, size) {
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="width:${size}px;height:${size}px;background:${color};border:2.5px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
-    iconSize: [size, size], iconAnchor: [size/2, size/2]
-  });
+function icon(color,size){
+  return L.divIcon({className:"custom-marker",
+    html:'<div style="width:'+size+'px;height:'+size+'px;background:'+color+';border:2.5px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>',
+    iconSize:[size,size],iconAnchor:[size/2,size/2]});
 }
 
-function getExpireStatus(expire) {
-  if (!expire) return { text: '待确认', cls: '' };
-  const d = new Date(expire), now = new Date('2026-05-27');
-  const days = Math.floor((d - now) / (1000*60*60*24));
-  if (days < 0) return { text: `已过期${Math.abs(days)}天`, cls: 'expire-urgent' };
-  if (days <= 180) return { text: `剩余${days}天`, cls: days <= 30 ? 'expire-urgent' : 'expire-warn' };
-  return { text: `剩余${days}天`, cls: 'expire-ok' };
+function expireStatus(exp){
+  if(!exp)return{text:"待确认",cls:""};
+  var d=new Date(exp),now=new Date("2026-05-27");
+  var days=Math.floor((d-now)/86400000);
+  if(days<0)return{text:"已过期"+Math.abs(days)+"天",cls:"expire-urgent"};
+  if(days<=180)return{text:"剩余"+days+"天",cls:days<=30?"expire-urgent":"expire-warn"};
+  return{text:"剩余"+days+"天",cls:"expire-ok"};
 }
 
-// 画贝塞尔曲线（模拟弧线）
-function bezierCurve(p1, p2) {
-  const midLng = (p1[1] + p2[1]) / 2;
-  const midLat = (p1[0] + p2[0]) / 2;
-  const ctrlLng = midLng + (p1[1] > p2[1] ? -3 : 3);
-  const ctrlLat = midLat + 5;
-  return `M ${p1[1]} ${p1[0]} Q ${ctrlLng} ${ctrlLat} ${p2[1]} ${p2[0]}`;
-}
-
-// ============ 渲染仓库标记 ============
-warehouses.forEach(w => {
-  const expireInfo = getExpireStatus(w.expire);
-  const markerSize = w.type === '新零售仓' ? 10 : 14;
-  const marker = L.marker([w.lat, w.lng], { icon: createIcon(w.subColor, markerSize) });
-
-  const subtypeTag = w.subType !== '新零售仓' 
-    ? `<span class="popup-subtype" style="background:#eee;color:#555;">${w.subType}</span>` 
-    : '';
+/* 渲染标记 */
+for(var wi=0;wi<warehouses.length;wi++){
+  var w=warehouses[wi];
+  var ei=expireStatus(w.expire);
+  var ms=w.type==="新零售仓"?10:14;
+  var m=L.marker([w.lat,w.lng],{icon:icon(w.subColor,ms)});
   
-  const dataKey = nameMapping[w.name] || w.name;
-  const hasCoverage = shippingData[dataKey] && Object.keys(shippingData[dataKey]).length > 0;
-  const coverBtn = hasCoverage 
-    ? `<br><button class="popup-btn" onclick="showCoverage('${w.name.replace(/'/g,"\\'")}')">🗺️ 查看覆盖区域</button>` 
-    : '';
-
-  marker.bindPopup(`
-    <div class="popup-title">${w.name}</div>
-    ${subtypeTag}
-    <div class="popup-info">
-      📍 地址：<span>${w.addr}</span><br>
-      🤝 供应商：<span>${w.supplier || '待确认'}</span><br>
-      ⏰ 合同到期：<span class="popup-expire ${expireInfo.cls}">${w.expire || '待确认'}（${expireInfo.text}）</span>
-    </div>
-    ${coverBtn}
-  `, { maxWidth: 340 });
-
-  marker.addTo(layerGroups[w.type]);
-  allMarkers[w.name] = marker;
-
-  if (expireInfo.cls === 'expire-urgent' || expireInfo.cls === 'expire-warn') {
-    L.circleMarker([w.lat, w.lng], {
-      radius: 20, color: '#e74c3c', fillColor: '#e74c3c',
-      fillOpacity: 0.12, weight: 2, opacity: 0.5
-    }).addTo(expiringMarkers);
+  var hasCov=nameMap[w.name]&&shippingData[nameMap[w.name]];
+  var covBtn=hasCov?'<br><button class="popup-btn" onclick="showCoverage(\''+w.name+'\')">🗺 查看覆盖区域</button>':"";
+  
+  m.bindPopup('<div class="popup-title">'+w.name+'</div>'
+    +'<span class="popup-subtype">'+w.subType+'</span>'
+    +'<div class="popup-info">📍 地址：<span>'+w.addr+'</span><br>🤝 供应商：<span>'+(w.supplier||"待确认")+'</span><br>'
+    +'⏰ 合同到期：<span class="popup-expire '+ei.cls+'">'+(w.expire||"待确认")+"（"+ei.text+'）</span></div>'
+    +covBtn,{maxWidth:340});
+  
+  m.addTo(layerGroups[w.type]);
+  allMarkers[w.name]=m;
+  
+  if(ei.cls==="expire-urgent"||ei.cls==="expire-warn"){
+    L.circleMarker([w.lat,w.lng],{radius:20,color:"#e74c3c",fillColor:"#e74c3c",fillOpacity:.12,weight:2,opacity:.5}).addTo(expiringMarkers);
   }
-});
+}
 
-// ============ 覆盖区域功能 ============
-function drawCoverage(warehouseName, destData) {
+/* 覆盖区域 */
+function drawCoverage(name,dest){
   coverageLayer.clearLayers();
-  const w = warehouses.find(x => x.name === warehouseName);
-  if (!w || !destData) return;
+  var w=null;
+  for(var i=0;i<warehouses.length;i++){if(warehouses[i].name===name){w=warehouses[i];break;}}
+  if(!w||!dest)return;
+  var total=0,maxV=0;
+  var keys=Object.keys(dest);
+  for(var k=0;k<keys.length;k++){total+=dest[keys[k]][0];if(dest[keys[k]][0]>maxV)maxV=dest[keys[k]][0];}
   
-  const total = Object.values(destData).reduce((a,b) => a + b[0], 0);
-  const maxVal = Math.max(...Object.values(destData).map(x => x[0]));
-  
-  // 从起点到各目的地的连线
-  Object.entries(destData).slice(0, 5).forEach(([prov, arr) => {
-    const [cnt, lng, lat] = arr;
-    const width = (cnt / maxVal * 12) + 2;
-    const opacity = (cnt / maxVal * 0.7) + 0.3;
+  for(var j=0;j<Math.min(keys.length,5);j++){
+    var prov=keys[j];
+    var cnt=dest[prov][0],lng=dest[prov][1],lat=dest[prov][2];
+    var wd=(cnt/maxV*12)+2,op=(cnt/maxV*.7)+.3;
     
-    // 用 Polyline 不用 SVG curve（更简洁）
-    const coords = [[w.lat, w.lng], [lat, lng]];
-    const line = L.polyline(coords, {
-      color: '#ff6b00', weight: width, opacity: opacity,
-      dashArray: '5,8'
-    });
-    line.addTo(coverageLayer);
-    
-    // 目的省标记
-    L.circleMarker([lat, lng], {
-      radius: (cnt / maxVal * 12) + 4,
-      fillColor: '#ff6b00', fillOpacity: 0.6,
-      color: '#fff', weight: 1.5, opacity: 0.9
-    }).bindTooltip(`${prov}: ${cnt.toLocaleString()}单 (${(cnt/total*100).toFixed(1)}%)`, {
-      direction:'top', offset:[0,-10]
-    }).addTo(coverageLayer);
-  });
-  
-  // 当前仓库高亮
-  L.circleMarker([w.lat, w.lng], {
-    radius: 16, fillColor: w.subColor, fillOpacity: 0.4,
-    color: w.subColor, weight: 3, opacity: 0.8
-  }).addTo(coverageLayer);
-}
-
-function showCoverage(warehouseName) {
-  const dataKey = nameMapping[warehouseName] || warehouseName;
-  const destData = shippingData[dataKey];
-  
-  if (!destData) {
-    alert('暂无该仓库的发货数据');
-    return;
+    L.polyline([[w.lat,w.lng],[lat,lng]],{color:"#ff6b00",weight:wd,opacity:op,dashArray:"5,8"}).addTo(coverageLayer);
+    L.circleMarker([lat,lng],{radius:(cnt/maxV*12)+4,fillColor:"#ff6b00",fillOpacity:.6,color:"#fff",weight:1.5,opacity:.9})
+      .bindTooltip(prov+": "+cnt.toLocaleString()+"单 ("+(cnt/total*100).toFixed(1)+"%)",{direction:"top",offset:[0,-10]})
+      .addTo(coverageLayer);
   }
-  
-  // 显示面板
-  const panel = document.getElementById('coveragePanel');
-  const title = document.getElementById('panelTitle');
-  const content = document.getElementById('panelContent');
-  const w = warehouses.find(x => x.name === warehouseName);
-  
-  title.textContent = `${w.name} 的覆盖区域`;
-  
-  const total = Object.values(destData).reduce((a,b) => a + b[0], 0);
-  const maxVal = Math.max(...Object.values(destData).map(x => x[0]));
-  
-  let html = `<div style="margin-bottom:10px;font-size:11px;color:#888;">总发货量: ${total.toLocaleString()} 单</div>`;
-  Object.entries(destData).sort((a,b) => b[1][0] - a[1][0]).slice(0, 6).forEach(([prov, arr]) => {
-    const cnt = arr[0];
-    const pct = (cnt / total * 100).toFixed(1);
-    const barW = (cnt / maxVal * 100).toFixed(0);
-    html += `
-      <div class="coverage-row">
-        <div class="cov-prov">${prov}</div>
-        <div class="cov-bar-wrap"><div class="cov-bar" style="width:${barW}%"></div></div>
-        <div class="cov-pct">${cnt.toLocaleString()} (${pct}%)</div>
-      </div>`;
-  });
-  content.innerHTML = html;
-  panel.classList.add('show');
-  
-  // 绘制地图连线
-  drawCoverage(warehouseName, destData);
-  
-  // 自动定位视图
-  const wCoords = warehouses.find(x => x.name === warehouseName);
-  map.setView([wCoords.lat, wCoords.lng], 6, { animate: true });
+  L.circleMarker([w.lat,w.lng],{radius:16,fillColor:w.subColor,fillOpacity:.4,color:w.subColor,weight:3,opacity:.8}).addTo(coverageLayer);
 }
 
-function toggleCoverage() {
-  const btn = document.getElementById('coverBtn');
-  coverageOn = !coverageOn;
-  if (coverageOn) {
-    btn.classList.add('active');
-    btn.innerHTML = '<span>🗺️</span> 隐藏覆盖区域';
-  } else {
-    btn.classList.remove('active');
-    btn.innerHTML = '<span>🗺️</span> 显示覆盖区域';
-    coverageLayer.clearLayers();
-    document.getElementById('coveragePanel').classList.remove('show');
+function showCoverage(name){
+  var key=nameMap[name]||name;
+  var dest=shippingData[key];
+  if(!dest){alert("暂无该仓库的发货数据");return;}
+  
+  var w=null;for(var i=0;i<warehouses.length;i++){if(warehouses[i].name===name){w=warehouses[i];break;}}
+  document.getElementById("panelTitle").textContent=w.name+" 的覆盖区域";
+  
+  var total=0,maxV=0;
+  var keys=Object.keys(dest);
+  for(var k=0;k<keys.length;k++){total+=dest[keys[k]][0];if(dest[keys[k]][0]>maxV)maxV=dest[keys[k]][0];}
+  
+  var html='<div style="margin-bottom:10px;font-size:11px;color:#888">总发货量: '+total.toLocaleString()+" 单</div>";
+  /* 排序 */
+  var sorted=[];
+  for(var s=0;s<keys.length;s++)sorted.push({p:keys[s],v:dest[keys[s]][0]});
+  sorted.sort(function(a,b){return b.v-a.v});
+  
+  for(var r=0;r<Math.min(sorted.length,6);r++){
+    var prov=sorted[r].p,cnt=sorted[r].v;
+    html+='<div class="cov-row"><div class="cov-prov">'+prov+'</div>'
+      +'<div class="cov-bar-wrap"><div class="cov-bar" style="width:'+(cnt/maxV*100)+'%"></div></div>'
+      +'<div class="cov-pct">'+cnt.toLocaleString()+" ("+(cnt/total*100).toFixed(1)+"%)</div></div>";
+  }
+  document.getElementById("panelContent").innerHTML=html;
+  document.getElementById("coveragePanel").classList.add("show");
+  drawCoverage(name,dest);
+  
+  for(var i=0;i<warehouses.length;i++){
+    if(warehouses[i].name===name){map.setView([warehouses[i].lat,warehouses[i].lng],6,{animate:true});break;}
   }
 }
 
-function closeCoverage() {
-  document.getElementById('coveragePanel').classList.remove('show');
-  if (coverageOn) toggleCoverage();
+function toggleCoverage(){
+  coverageOn=!coverageOn;
+  var btn=document.getElementById("coverBtn");
+  if(coverageOn){btn.classList.add("active");btn.textContent="🗺 隐藏覆盖区域";}
+  else{btn.classList.remove("active");btn.textContent="🗺 显示覆盖区域";coverageLayer.clearLayers();document.getElementById("coveragePanel").classList.remove("show");}
 }
 
-// ============ 其他控制 ============
-function toggleLayer(type) {
-  const group = layerGroups[type];
-  if (map.hasLayer(group)) map.removeLayer(group);
-  else group.addTo(map);
-}
-function toggleExpiring() {
-  if (map.hasLayer(expiringMarkers)) map.removeLayer(expiringMarkers);
-  else expiringMarkers.addTo(map);
-}
+function closeCoverage(){document.getElementById("coveragePanel").classList.remove("show");if(coverageOn)toggleCoverage();}
+
+function toggleLayer(type){var g=layerGroups[type];if(map.hasLayer(g))map.removeLayer(g);else g.addTo(map);}
+function toggleExpiring(){if(map.hasLayer(expiringMarkers))map.removeLayer(expiringMarkers);else expiringMarkers.addTo(map);}
 </script>
 </body>
 </html>
