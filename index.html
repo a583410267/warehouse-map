@@ -94,27 +94,27 @@ const warehouses = [
   // ═══════════════════════════════════════════
   {name:"小件-北京中心仓",type:"售前仓",subType:"小件仓",subColor:"#3498db",
    addr:"北京市大兴区经济开发区科创十街十五号(亦庄小米产业园)T1楼1层",
-   lat:39.78,lng:116.50,expire:"2026-06-30",supplier:"自营"},
+   lat:39.78,lng:116.50,expire:"2026-06-30",supplier:"小米自有"},
 
   {name:"中件-北京中件仓",type:"售前仓",subType:"中件仓",subColor:"#3498db",
    addr:"北京市平谷区马坊规划六路与陆港北一街交叉口北180米",
-   lat:40.17,lng:117.12,expire:"2026-11-30",supplier:"中材"},
+   lat:40.17,lng:117.12,expire:"2026-11-30",supplier:"京东"},
 
   {name:"中小件-昆山小件仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"江苏省昆山市杜鹃路188号",
-   lat:31.39,lng:120.98,expire:"",supplier:""},
+   lat:31.39,lng:120.98,expire:"",supplier:"嘉民"},
 
   {name:"中小件-武汉中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"武汉市江夏区江夏大道普洛斯物流园B6-3小米仓7号门",
-   lat:30.37,lng:114.34,expire:"",supplier:""},
+   lat:30.37,lng:114.34,expire:"",supplier:"普洛斯"},
 
   {name:"中小件-成都中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"成都市新津区金华镇龙溪河北路516号普洛斯A2-3小米仓库",
-   lat:30.42,lng:103.81,expire:"2026-09-30",supplier:""},
+   lat:30.42,lng:103.81,expire:"2026-09-30",supplier:"普洛斯"},
 
   {name:"中小件-郑州中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"河南省郑州市中牟县南三环新安路10号宅急送南门",
-   lat:34.72,lng:114.02,expire:"",supplier:""},
+   lat:34.72,lng:114.02,expire:"",supplier:"宅急送"},
 
   {name:"中小件-潍坊中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"山东省潍坊市奎文区新钢街道钢城社区潍安路与凤凰街交汇处东500米（顺丰丰泰产业园）B栋二楼北侧4号",
@@ -126,50 +126,58 @@ const warehouses = [
 
   {name:"中小件-沈阳中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"沈阳市铁西区浑河十八街丰树国际产业园2A-1",
-   lat:41.80,lng:123.43,expire:"",supplier:""},
+   lat:41.80,lng:123.43,expire:"",supplier:"丰树"},
 
   {name:"中小件-合肥仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"安徽省合肥市长丰县淮南北路与双凤路交汇处东南侧京东亚一物流园",
-   lat:31.82,lng:117.28,expire:"",supplier:""},
+   lat:31.82,lng:117.28,expire:"",supplier:"京东"},
 
   {name:"中小件-泉州仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"福建省泉州市晋江市泉州顺丰创新产业园",
-   lat:24.87,lng:118.68,expire:"",supplier:""},
+   lat:24.87,lng:118.68,expire:"",supplier:"顺丰"},
 
   {name:"中小件-昆明仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"云南省昆明市呈贡区七甸工业园区深国际物流港4号库2楼431号门",
-   lat:24.88,lng:102.83,expire:"2026-10-31",supplier:""},
+   lat:24.88,lng:102.83,expire:"2026-10-31",supplier:"京东"},
 
   {name:"中小件-兰州仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"甘肃省兰州市新区秦川镇中川北站物流园-甘肃国通",
-   lat:36.06,lng:103.83,expire:"2026-08-31",supplier:""},
+   lat:36.06,lng:103.83,expire:"2026-08-31",supplier:"邮政"},
+
+  {name:"中小件-深圳中心仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
+   addr:"深圳市",
+   lat:22.54,lng:114.06,expire:"2026-05-31",supplier:"越海"},
+
+  {name:"中小件-广州从化仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
+   addr:"广州市从化区",
+   lat:23.13,lng:113.58,expire:"2028-03-31",supplier:"顺丰"},
 
   {name:"中小件-乌鲁木齐仓",type:"售前仓",subType:"中小件仓",subColor:"#3498db",
    addr:"新疆自治区乌鲁木齐市新市区中亚北路889号中亚通物流园3号库",
-   lat:43.83,lng:87.58,expire:"2026-08-31",supplier:""},
+   lat:43.83,lng:87.58,expire:"2026-08-31",supplier:"顺丰"},
 
   // ═══════════════════════════════════════════
   // 有品仓 5个
   // ═══════════════════════════════════════════
   {name:"天津-东丽仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",
    addr:"天津市东丽区通年路99号丰泰产业园二期二层E203库01月台",
-   lat:39.08,lng:117.31,expire:"2026-08-31",supplier:""},
+   lat:39.08,lng:117.31,expire:"2026-08-31",supplier:"顺丰"},
 
   {name:"广东-东莞仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",
    addr:"广东省东莞市洪梅镇洪屋涡村望沙路115号（京东华南物流中心洪梅园区）",
-   lat:22.96,lng:113.60,expire:"",supplier:""},
+   lat:22.96,lng:113.60,expire:"",supplier:"京东"},
 
   {name:"贵州-茅台仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",
    addr:"贵州省贵阳市南明区秦棋村丰泰产业园C栋1楼",
-   lat:26.65,lng:106.71,expire:"",supplier:""},
+   lat:26.65,lng:106.71,expire:"",supplier:"顺丰"},
 
   {name:"江苏-昆山仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",
    addr:"江苏省苏州市昆山市千灯镇瞿家路555号京东亚洲一号物流园5号库32号月台",
-   lat:31.33,lng:121.02,expire:"",supplier:""},
+   lat:31.33,lng:121.02,expire:"",supplier:"京东"},
 
   {name:"湖北-武汉仓",type:"有品仓",subType:"有品仓",subColor:"#2ecc71",
    addr:"湖北省武汉市东西湖区新沟镇荷沙路84号星宜物流园A2-26库",
-   lat:30.62,lng:114.13,expire:"2026-08-31",supplier:""},
+   lat:30.62,lng:114.13,expire:"2026-08-31",supplier:"顺丰"},
 
   // ═══════════════════════════════════════════
   // 新零售仓 27个（供应商：顺丰）
